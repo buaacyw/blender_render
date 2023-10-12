@@ -17,7 +17,7 @@ def handle_found_object(
     target_directory:str,
     num_images: int,
     gpu_index,
-    render_timeout: int = 500,
+    render_timeout: int = 200,
     successful_log_file: Optional[str] = "handle-found-object-successful.csv",
     failed_log_file: Optional[str] = "handle-found-object-failed.csv",
 ) -> bool:
@@ -79,14 +79,16 @@ def handle_found_object(
     # command = f"export DISPLAY=:0.{gpu_i} && {command}"
 
     # render the object (put in dev null)
-    print(command)
-    subprocess.run(
-        ["bash", "-c", command],
-        timeout=render_timeout,
-        check=False,
-        stdout=subprocess.DEVNULL,
-        # stderr=subprocess.DEVNULL,
-    )
+    try:
+        subprocess.run(
+            ["bash", "-c", command],
+            timeout=render_timeout,
+            check=False,
+            stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL,
+        )
+    except Exception as e:
+        print(e)
 
     # check that the renders were saved successfully
     png_files = glob.glob(os.path.join(target_directory, "*.png"))
@@ -98,6 +100,8 @@ def handle_found_object(
         logger.error(
             f"Found object {object_path} was not rendered successfully!"
         )
+        print(command)
+
         if failed_log_file is not None:
             log_processed_object(
                 failed_log_file,
