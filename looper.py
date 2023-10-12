@@ -79,12 +79,12 @@ def handle_found_object(
     # command = f"export DISPLAY=:0.{gpu_i} && {command}"
 
     # render the object (put in dev null)
-    # print(command)
+    print(command)
     subprocess.run(
         ["bash", "-c", command],
         timeout=render_timeout,
         check=False,
-        # stdout=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
         # stderr=subprocess.DEVNULL,
     )
 
