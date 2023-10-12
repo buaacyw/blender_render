@@ -79,6 +79,7 @@ def handle_found_object(
     # command = f"export DISPLAY=:0.{gpu_i} && {command}"
 
     # render the object (put in dev null)
+    print(command)
     subprocess.run(
         ["bash", "-c", command],
         timeout=render_timeout,
@@ -97,7 +98,6 @@ def handle_found_object(
         logger.error(
             f"Found object {object_path} was not rendered successfully!"
         )
-        print(command)
         if failed_log_file is not None:
             log_processed_object(
                 failed_log_file,
@@ -172,24 +172,27 @@ if __name__ == "__main__":
 
     with open('Cap3D_automated_Objaverse_no3Dword.pkl', 'rb') as f:
         airbnb_data = pickle.load(f)
-    cat_list = sorted(os.listdir(args.object_dir))
     count=0
-    for cat in cat_list:
-        print(cat)
-        cur_cat_path = os.path.join(args.object_dir, cat)
-        uid_list = sorted(os.listdir(cur_cat_path))
-        for uid in uid_list:
-            if uid.endswith('.glb') and uid.split('.')[0] in airbnb_data[:, 0]:
-                prompt = airbnb_data[airbnb_data[:, 0] == uid.split('.')[0]][0, 1]
-                save_path = os.path.join(args.output_dir, uid.split('.')[0])
-                if os.path.exists(save_path):
-                    print("already rendered: ", save_path)
-                    continue
-                else:
-                    try:
-                        os.makedirs(save_path, exist_ok=False)
-                    except Exception as e:
+    while True:
+        cat_list = sorted(os.listdir(args.object_dir))
+        for cat in cat_list:
+            print(cat)
+            cur_cat_path = os.path.join(args.object_dir, cat)
+            uid_list = sorted(os.listdir(cur_cat_path))
+            for uid in uid_list:
+                if uid.endswith('.glb') and uid.split('.')[0] in airbnb_data[:, 0]:
+                    prompt = airbnb_data[airbnb_data[:, 0] == uid.split('.')[0]][0, 1]
+                    save_path = os.path.join(args.output_dir, uid.split('.')[0])
+                    if os.path.exists(save_path):
+                        print("already rendered: ", save_path)
                         continue
-                handle_found_object(object_path=os.path.join(cur_cat_path, uid), gpu_index=args.gpu, blender=args.blender, engine=args.engine,prompt=prompt,target_directory=save_path,num_images=args.num_images)
-                count+=1
-                print(count, prompt, 'saved to', save_path, )
+                    else:
+                        try:
+                            os.makedirs(save_path, exist_ok=False)
+                        except Exception as e:
+                            continue
+                    cur_time = time.time()
+
+                    handle_found_object(object_path=os.path.join(cur_cat_path, uid), gpu_index=args.gpu, blender=args.blender, engine=args.engine,prompt=prompt,target_directory=save_path,num_images=args.num_images)
+                    count+=1
+                    print(count, prompt, 'saved to', save_path, 'time:', time.time()-cur_time)
