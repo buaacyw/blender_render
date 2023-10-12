@@ -17,7 +17,7 @@ def handle_found_object(
     target_directory:str,
     num_images: int,
     gpu_index,
-    render_timeout: int = 200,
+    render_timeout: int = 300,
     successful_log_file: Optional[str] = "handle-found-object-successful.csv",
     failed_log_file: Optional[str] = "handle-found-object-failed.csv",
 ) -> bool:
